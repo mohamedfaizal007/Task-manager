@@ -51,6 +51,15 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+# ─── TOKEN DECODE (REQUIRED) ──────────────────────────
+def decode_access_token(token: str):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        return username
+    except JWTError:
+        return None
+
 
 # ─── ROUTES ─────────────────────────
 
