@@ -299,25 +299,34 @@
 
   // ── Register ──────────────────────────────────────────────────────────────
 async function register() {
-  const username = document.getElementById("reg-username").value.trim();
-  const password = document.getElementById("reg-password").value;
+  try {
+    const username = document.getElementById("reg-username").value.trim();
+    const password = document.getElementById("reg-password").value;
 
-  if (!username || !password)
-    return showAlert("auth-alert", "Username and password are required.");
+    if (!username || !password) {
+      return showAlert("auth-alert", "Username and password are required.");
+    }
 
-  const res = await fetch(`${API}/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+    const res = await fetch(`${API}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (!res.ok)
-    return showAlert("auth-alert", data.detail || "Registration failed.");
+    if (!res.ok) {
+      console.log("REGISTER ERROR:", data);   // 🔥 DEBUG
+      return showAlert("auth-alert", data.detail || "Registration failed.");
+    }
 
-  showAlert("auth-alert", "Registered successfully! Please login.", "success");
-  showTab("login");
+    showAlert("auth-alert", "Registered successfully! Please login.", "success");
+    showTab("login");
+
+  } catch (err) {
+    console.error("NETWORK ERROR:", err);   // 🔥 DEBUG
+    showAlert("auth-alert", "Something went wrong. Check console.");
+  }
 }
 
   // ── Login ─────────────────────────────────────────────────────────────────
