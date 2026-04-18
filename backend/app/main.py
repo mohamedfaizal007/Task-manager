@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from starlette.responses import Response
 import os
 
 from app.database import engine, Base
@@ -29,8 +30,8 @@ app.add_middleware(
 )
 
 # ─── API Routes ───────────────────────────────────
-app.include_router(auth_router, prefix="/auth")
-app.include_router(tasks_router, prefix="/tasks")
+app.include_router(auth_router)
+app.include_router(tasks_router)
 
 # ─── Serve Frontend ───────────────────────────────
 FRONTEND_DIR = os.path.abspath(
@@ -40,6 +41,13 @@ FRONTEND_DIR = os.path.abspath(
 if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
+    @app.get("/config.js", include_in_schema=False)
+    def frontend_config():
+        api_base_url = os.getenv("PUBLIC_API_BASE_URL", "").rstrip("/")
+        return Response(
+            content=f'window.__APP_CONFIG__ = {{"apiBaseUrl": "{api_base_url}"}};',
+            media_type="application/javascript",
+        )
     @app.get("/", include_in_schema=False)
     def serve_frontend():
         return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
