@@ -299,78 +299,60 @@
 
   // ── Register ──────────────────────────────────────────────────────────────
 async function register() {
-  try {
-    const username = document.getElementById("reg-username").value.trim();
-    const password = document.getElementById("reg-password").value;
+  const username = document.getElementById("reg-username").value.trim();
+  const password = document.getElementById("reg-password").value;
 
-    if (!username || !password) {
-      return showAlert("auth-alert", "Username and password are required.");
-    }
-
-    const res = await fetch(`${API}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = { detail: await res.text() };
-    }
-
-    if (!res.ok) {
-      return showAlert("auth-alert", data.detail || "Registration failed.");
-    }
-
-    showAlert("auth-alert", "Registered successfully!", "success");
-    showTab("login");
-
-  } catch (err) {
-    console.error(err);
-    showAlert("auth-alert", "Network error occurred.");
+  if (!username || !password) {
+    return showAlert("auth-alert", "Username and password are required.");
   }
-}
 
+  const formData = new URLSearchParams();
+  formData.append("username", username);
+  formData.append("password", password);
+
+  const res = await fetch(`${API}/auth/register`, {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return showAlert("auth-alert", data.detail || "Registration failed.");
+  }
+
+  showAlert("auth-alert", "Registered successfully!", "success");
+  showTab("login");
+}
   // ── Login ─────────────────────────────────────────────────────────────────
 async function login() {
-  try {
-    const username = document.getElementById("login-username").value.trim();
-    const password = document.getElementById("login-password").value;
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value;
 
-    if (!username || !password) {
-      return showAlert("auth-alert", "Please enter username and password.");
-    }
-
-    const res = await fetch(`${API}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = { detail: await res.text() };
-    }
-
-    if (!res.ok) {
-      return showAlert("auth-alert", data.detail || "Login failed.");
-    }
-
-    token = data.access_token;
-    localStorage.setItem("token", token);
-    localStorage.setItem("username", username);
-
-    showAlert("auth-alert", "Login successful!", "success");
-    showApp();
-
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    showAlert("auth-alert", "Network error occurred.");
+  if (!username || !password) {
+    return showAlert("auth-alert", "Please enter username and password.");
   }
+
+  const formData = new URLSearchParams();
+  formData.append("username", username);
+  formData.append("password", password);
+
+  const res = await fetch(`${API}/auth/login`, {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return showAlert("auth-alert", data.detail || "Login failed.");
+  }
+
+  token = data.access_token;
+  localStorage.setItem("token", token);
+  localStorage.setItem("username", username);
+
+  showApp();
 }
 
   // ── Logout ────────────────────────────────────────────────────────────────
