@@ -313,41 +313,65 @@ async function register() {
       body: JSON.stringify({ username, password }),
     });
 
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = { detail: await res.text() };
+    }
 
     if (!res.ok) {
-      console.log("REGISTER ERROR:", data);   // 🔥 DEBUG
       return showAlert("auth-alert", data.detail || "Registration failed.");
     }
 
-    showAlert("auth-alert", "Registered successfully! Please login.", "success");
+    showAlert("auth-alert", "Registered successfully!", "success");
     showTab("login");
 
   } catch (err) {
-    console.error("NETWORK ERROR:", err);   // 🔥 DEBUG
-    showAlert("auth-alert", "Something went wrong. Check console.");
+    console.error(err);
+    showAlert("auth-alert", "Network error occurred.");
   }
 }
 
   // ── Login ─────────────────────────────────────────────────────────────────
-  async function login() {
+async function login() {
+  try {
     const username = document.getElementById("login-username").value.trim();
     const password = document.getElementById("login-password").value;
-    if (!username || !password) return showAlert("auth-alert", "Please enter username and password.");
+
+    if (!username || !password) {
+      return showAlert("auth-alert", "Please enter username and password.");
+    }
 
     const res = await fetch(`${API}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    const data = await res.json();
-    if (!res.ok) return showAlert("auth-alert", data.detail || "Login failed.");
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = { detail: await res.text() };
+    }
+
+    if (!res.ok) {
+      return showAlert("auth-alert", data.detail || "Login failed.");
+    }
 
     token = data.access_token;
     localStorage.setItem("token", token);
     localStorage.setItem("username", username);
+
+    showAlert("auth-alert", "Login successful!", "success");
     showApp();
+
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    showAlert("auth-alert", "Network error occurred.");
   }
+}
 
   // ── Logout ────────────────────────────────────────────────────────────────
   function logout() {
