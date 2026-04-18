@@ -5,7 +5,10 @@ from fastapi.responses import FileResponse
 import os
 
 from app.database import engine, Base
-from app.routes import auth, tasks
+
+# ✅ FIX: direct imports (no package ambiguity)
+from app.routes.auth import router as auth_router
+from app.routes.tasks import router as tasks_router
 
 # Create all database tables on startup
 Base.metadata.create_all(bind=engine)
@@ -16,21 +19,23 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# ─── CORS ─────────────────────────────────────────────────────────────────────
+# ─── CORS ─────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # Tighten this in production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ─── API Routes ───────────────────────────────────────────────────────────────
-app.include_router(auth.router, prefix="/auth")
-app.include_router(tasks.router, prefix="/tasks")
+# ─── API Routes ───────────────────────────────────
+app.include_router(auth_router, prefix="/auth")
+app.include_router(tasks_router, prefix="/tasks")
 
-# ─── Serve Frontend ───────────────────────────────────────────────────────────
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "frontend")
+# ─── Serve Frontend ───────────────────────────────
+FRONTEND_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "frontend")
+)
 
 if os.path.exists(FRONTEND_DIR):
     app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
@@ -39,7 +44,7 @@ if os.path.exists(FRONTEND_DIR):
     def serve_frontend():
         return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
-
+# ─── Health Check ─────────────────────────────────
 @app.get("/health", tags=["Health"])
 def health_check():
     return {"status": "ok", "message": "Task Manager API is running"}
