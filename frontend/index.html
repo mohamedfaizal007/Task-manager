@@ -298,22 +298,27 @@
   }
 
   // ── Register ──────────────────────────────────────────────────────────────
-  async function register() {
-    const username = document.getElementById("reg-username").value.trim();
-    const email = document.getElementById("reg-email").value.trim();
-    const password = document.getElementById("reg-password").value;
-    if (!username || !email || !password) return showAlert("auth-alert", "All fields are required.");
+async function register() {
+  const username = document.getElementById("reg-username").value.trim();
+  const password = document.getElementById("reg-password").value;
 
-    const res = await fetch(`${API}/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) return showAlert("auth-alert", data.detail || "Registration failed.");
-    showAlert("auth-alert", "Registered successfully! Please login.", "success");
-    showTab("login");
-  }
+  if (!username || !password)
+    return showAlert("auth-alert", "Username and password are required.");
+
+  const res = await fetch(`${API}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok)
+    return showAlert("auth-alert", data.detail || "Registration failed.");
+
+  showAlert("auth-alert", "Registered successfully! Please login.", "success");
+  showTab("login");
+}
 
   // ── Login ─────────────────────────────────────────────────────────────────
   async function login() {
