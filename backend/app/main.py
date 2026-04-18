@@ -26,8 +26,8 @@ app.add_middleware(
 )
 
 # ─── API Routes ───────────────────────────────────────────────────────────────
-app.include_router(auth.router)
-app.include_router(tasks.router)
+app.include_router(auth.router, prefix="/auth")
+app.include_router(tasks.router, prefix="/tasks")
 
 # ─── Serve Frontend ───────────────────────────────────────────────────────────
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "frontend")
