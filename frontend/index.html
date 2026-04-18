@@ -299,30 +299,43 @@
 
   // ── Register ──────────────────────────────────────────────────────────────
 async function register() {
-  const username = document.getElementById("reg-username").value.trim();
-  const password = document.getElementById("reg-password").value;
+  try {
+    const username = document.getElementById("reg-username").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
 
-  if (!username || !password) {
-    return showAlert("auth-alert", "Username and password are required.");
+    if (!username || !email || !password) {
+      return showAlert("auth-alert", "All fields are required.");
+    }
+
+    const res = await fetch(`${API}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username,
+        email,
+        password
+      }),
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = { detail: await res.text() };
+    }
+
+    if (!res.ok) {
+      return showAlert("auth-alert", data.detail || "Registration failed.");
+    }
+
+    showAlert("auth-alert", "Registered successfully!", "success");
+    showTab("login");
+
+  } catch (err) {
+    console.error(err);
+    showAlert("auth-alert", "Network error occurred.");
   }
-
-  const formData = new URLSearchParams();
-  formData.append("username", username);
-  formData.append("password", password);
-
-  const res = await fetch(`${API}/auth/register`, {
-    method: "POST",
-    body: formData
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    return showAlert("auth-alert", data.detail || "Registration failed.");
-  }
-
-  showAlert("auth-alert", "Registered successfully!", "success");
-  showTab("login");
 }
   // ── Login ─────────────────────────────────────────────────────────────────
 async function login() {
